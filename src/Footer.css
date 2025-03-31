@@ -1,0 +1,39 @@
+.footer {
+    background-color: #222;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .socials {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .socials a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s;
+  }
+  
+  .socials a:hover {
+    color: #f39c12;
+  }
+  
+  p {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
