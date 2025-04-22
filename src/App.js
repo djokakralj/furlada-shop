@@ -1,24 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Route, Switch, useLocation } from 'wouter';
+import Header from './components/Header';
+import CartPage from './pages/CartPage';
+import HomePage from './pages/HomePage';
+import ProductPage from './pages/ProductPage'; // Dodato
+import { CartProvider } from './context/CartContext';
+import Footer from './Footer';
+import SearchResults from './pages/SearchResults';
+
+
 
 function App() {
+  const [loc] = useLocation();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <CartProvider>
+      <Header />
+
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/cart" component={CartPage} />
+        <Route path="/product/:id" component={ProductPage} /> {/* Nova ruta */}
+        <Route path="/search">
+        {() => <SearchResults key={loc} />}
+        </Route>
+        <Route>404 - Stranica nije pronađena</Route>
+      </Switch>
+
+      <Footer />
+    </CartProvider>
   );
 }
 
