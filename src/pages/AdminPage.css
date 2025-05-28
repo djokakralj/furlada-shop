@@ -1,0 +1,127 @@
+.admin-panel-container {
+  max-width: 520px;
+  margin: 48px auto 60px auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px 0 rgba(31, 38, 135, 0.13);
+  padding: 36px 32px 28px 32px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.admin-panel-container h2 {
+  text-align: center;
+  margin-bottom: 22px;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #22223b;
+  letter-spacing: 1px;
+}
+
+.admin-panel-container h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #3a3a5a;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.admin-panel-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #f4f8fb;
+  border-radius: 12px;
+  padding: 20px 18px 14px 18px;
+  box-shadow: 0 2px 10px 0 rgba(31, 38, 135, 0.06);
+  margin-bottom: 32px;
+}
+
+.admin-panel-container input[type="text"],
+.admin-panel-container input[type="number"],
+.admin-panel-container textarea {
+  padding: 11px 14px;
+  border-radius: 7px;
+  border: 1.5px solid #e0e0e0;
+  font-size: 1rem;
+  background: #f7f7f7;
+  color: #222;
+  margin-bottom: 2px;
+  transition: border 0.2s;
+}
+
+.admin-panel-container input[type="text"]:focus,
+.admin-panel-container input[type="number"]:focus,
+.admin-panel-container textarea:focus {
+  border: 1.5px solid #4f8cff;
+  outline: none;
+  background: #eaf1fb;
+}
+
+.admin-panel-container button[type="submit"] {
+  background: linear-gradient(90deg, #4f8cff 0%, #2563eb 100%);
+  color: #fff;
+  font-size: 1.08rem;
+  padding: 11px 0;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px 0 rgba(79, 140, 255, 0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.admin-panel-container button[type="submit"]:hover {
+  background: linear-gradient(90deg, #2563eb 0%, #4f8cff 100%);
+  box-shadow: 0 4px 16px 0 rgba(79, 140, 255, 0.13);
+}
+
+.admin-panel-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-panel-container li {
+  display: flex;
+  align-items: center;
+  background: #f7fafd;
+  border-radius: 10px;
+  box-shadow: 0 1px 8px 0 rgba(31, 38, 135, 0.07);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.admin-panel-container li:hover {
+  box-shadow: 0 4px 18px 0 rgba(31, 38, 135, 0.16);
+  background: #eaf1fb;
+}
+
+.admin-panel-container strong {
+  font-size: 1.13rem;
+  color: #22223b;
+  margin-right: 12px;
+  font-weight: 600;
+}
+
+.admin-panel-container .delete-btn {
+  margin-left: auto;
+  color: #fff;
+  background: linear-gradient(90deg, #e63946 0%, #b91c1c 100%);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 7px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 6px 0 rgba(230, 57, 70, 0.09);
+}
+
+.admin-panel-container .delete-btn:hover {
+  background: linear-gradient(90deg, #b91c1c 0%, #e63946 100%);
+  box-shadow: 0 2px 12px 0 rgba(230, 57, 70, 0.18);
+}

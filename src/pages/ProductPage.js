@@ -1,47 +1,64 @@
 import React, { useEffect, useState } from 'react';
+import { useRoute } from 'wouter';
+import { getProducts } from '../data/products';
+import { useCart } from '../context/CartContext';
 import './ProductPage.css';
-import { useRoute } from 'wouter'; // Ispravljen import za Wouter
-import { getProducts } from '../data/products'; // Import funkcije za dobijanje proizvoda
 
-const ProductPage = () => {
-  const { id } = useRoute('/product/:id'); // Ispravno korišćenje Wouter-a za dobijanje parametra iz URL-a
+function ProductPage() {
+  const [match, params] = useRoute('/product/:id');
+  const { id } = params || {};
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     async function fetchProduct() {
-      try {
-        const products = await getProducts(); // Učitavanje svih proizvoda
-        const foundProduct = products.find((p) => p.id === id); // Pronalazak proizvoda po ID-u
-        setProduct(foundProduct);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        setLoading(false);
-      }
+      const allProducts = await getProducts();
+      console.log('URL id:', id); // Debugging
+      console.log('All products:', allProducts); // Debugging
+      const found = allProducts.find((p) => String(p.id) === id); // Ensure type match
+      setProduct(found);
     }
 
-    fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
-  if (loading) {
-    return <p>Loading product...</p>;
-  }
-
-  if (!product) {
-    return <p>Proizvod nije pronađen!</p>;
-  }
+  if (!product) return <p>Učitavanje...</p>;
 
   return (
     <div className="product-page">
-      <img src={product.imageUrl} alt={product.name} className="product-image" />
+      <div className="product-carousel">
+        <img
+          src={product.imageUrls?.[activeIndex] || product.imageUrl}
+          alt={product.name}
+        />
+        {product.imageUrls?.length > 1 && (
+          <div className="carousel-thumbnails">
+            {product.imageUrls.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt={`Slika ${i + 1}`}
+                className={i === activeIndex ? 'active' : ''}
+                onClick={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="product-info">
-        <h2>{product.name}</h2>
-        <p>{product.description}</p>
-        <h3>{product.price} RSD</h3>
+        <h1>{product.name}</h1>
+        <p className="price">{product.price} RSD</p>
+        <p className="description">{product.description}</p>
+        <button className="add-to-cart" onClick={() => addToCart(product)}>
+          Dodaj u korpu
+        </button>
       </div>
     </div>
   );
-};
+}
 
 export default ProductPage;

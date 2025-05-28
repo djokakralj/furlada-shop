@@ -2,10 +2,12 @@ import './Header.css';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ShoppingCart, User, Heart, Search } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 function Header() {
   const [query, setQuery] = useState('');
   const [, setLocation] = useLocation();
+  const { isAdmin } = useAuth();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -49,6 +51,7 @@ function Header() {
       </form>
 
       <div className="icon-group">
+        {isAdmin && <Link href="/admin"><span style={{fontWeight:600}}>Admin</span></Link>}
         <Link href="/profile"><User size={20} /></Link>
         <Link href="/wishlist"><Heart size={20} /></Link>
         <Link href="/cart"><ShoppingCart size={20} /></Link>
@@ -58,4 +61,3 @@ function Header() {
 }
 
 export default Header;
-

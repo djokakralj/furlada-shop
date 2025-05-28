@@ -1,0 +1,102 @@
+.login-page {
+  max-width: 400px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  padding: 32px 28px 24px 28px;
+  color: #fff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.login-page h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.login-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-page label {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.login-page input[type="text"],
+.login-page input[type="password"] {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  outline: none;
+  background: #f7f7f7;
+  color: #222;
+}
+
+.login-page input[type="text"]:focus,
+.login-page input[type="password"]:focus {
+  border: 1.5px solid #2c5364;
+}
+
+.login-page .remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.login-page .remember-row label {
+  font-size: 0.97rem;
+  color: #e0e0e0;
+  margin-bottom: 0;
+}
+
+.login-page .forgot-link {
+  color: #b3e0ff;
+  font-size: 0.97rem;
+  text-decoration: underline;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.login-page button[type="submit"] {
+  background: #000;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 10px 0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.login-page button[type="submit"]:hover {
+  background: #222;
+}
+
+.login-page .register-row {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 1rem;
+}
+
+.login-page .register-link {
+  color: #b3e0ff;
+  text-decoration: underline;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.login-page p[style] {
+  text-align: center;
+  margin-top: 6px;
+}

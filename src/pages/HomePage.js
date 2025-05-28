@@ -4,6 +4,8 @@ import { FaInstagram, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { getProducts } from '../data/products'; // Import funkcije za dobijanje proizvoda
 import { Link } from 'wouter'; // Ispravan import za Wouter
+import ProductCard from '../components/ProductCard';
+
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -45,15 +47,7 @@ const HomePage = () => {
 
       <div className="product-list">
         {products.map(product => (
-          <div key={product.id} className="product-card">
-            <Link href={`/product/${product.id}`}> {/* Link promenjen za Wouter */}
-              <img src={product.imageUrl} alt={product.name} />
-              <h2>{product.name}</h2>
-              <p>{product.description}</p>
-              <span>{product.price} RSD</span>
-            </Link>
-            <button onClick={() => addToCart(product)}>Dodaj u korpu</button>
-          </div>
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>
