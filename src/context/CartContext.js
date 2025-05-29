@@ -1,11 +1,19 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Kreiramo CartContext
 const CartContext = createContext();
 
-// Komponenta koja omotava celu aplikaciju i omogućava pristup kontekstu
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+export function CartProvider({ children }) {
+  // Load cart from localStorage or start with empty array
+  const [cartItems, setCartItems] = useState(() => {
+    const stored = localStorage.getItem('cart');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Funkcija za dodavanje proizvoda u korpu
   const addToCart = (product) => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import './CartPage.css';
+import { Link } from 'wouter';
 
 const CartPage = () => {
   const { cartItems, removeFromCart } = useCart();
@@ -17,6 +18,7 @@ const CartPage = () => {
         <div className="cart-items">
           {cartItems.map((item, index) => (
             <div key={index} className="cart-item">
+              <Link href={`/product/${String(item.id)}`}>
               <div className="cart-item-info">
                 <img
                   src={item.imageUrl}
@@ -28,6 +30,7 @@ const CartPage = () => {
                   <p>{item.description}</p>
                 </div>
               </div>
+              </Link>
               <div className="cart-item-price">
                 <span>{item.price} RSD</span>
                 <button onClick={() => removeFromCart(item.id)}>Ukloni</button>

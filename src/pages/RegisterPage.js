@@ -10,6 +10,10 @@ function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,6 +35,38 @@ function RegisterPage() {
         Kreirajte novi nalog
       </p>
       <form onSubmit={handleSubmit}>
+        <label htmlFor="name">Ime</label>
+      <input
+        id="name"
+        type="text"
+        placeholder="Unesite ime"
+        value={name}
+        onChange={e => setName(e.target.value)}
+      />
+      <label htmlFor="surname">Prezime</label>
+      <input
+        id="surname"
+        type="text"
+        placeholder="Unesite prezime"
+        value={surname}
+        onChange={e => setSurname(e.target.value)}
+      />
+      <label htmlFor="phone">Telefon</label>
+      <input
+        id="phone"
+        type="tel"
+        placeholder="Unesite broj telefona"
+        value={phone}
+        onChange={e => setPhone(e.target.value)}
+      />
+      <label htmlFor="address">Adresa</label>
+      <input
+        id="address"
+        type="text"
+        placeholder="Unesite adresu"
+        value={address}
+        onChange={e => setAddress(e.target.value)}
+      />
         <label htmlFor="email">Email adresa</label>
         <input
           id="email"
