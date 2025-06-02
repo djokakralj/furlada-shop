@@ -1,78 +1,170 @@
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
-    background-color: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  
-  .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1e40af; /* Tailwind blue-800 */
-    text-decoration: none;
-  }
-  
-  .search-bar {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    max-width: 600px;
-    margin: 0 24px;
-    background-color: #f9fafb;
-    border: 1px solid #d1d5db;
-    border-radius: 9999px;
-    overflow: hidden;
-  }
-  
-  .search-icon {
-    margin-left: 12px;
-    color: #6b7280;
-  }
-  
-  .search-input {
-    flex: 1;
-    padding: 10px 12px;
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 0.9rem;
-  }
-  
-  .search-button {
-    background-color: transparent;
-    border-left: 1px solid #d1d5db;
-    padding: 10px 16px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: #374151;
-  }
-  
-  .icon-group {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .icon-group a {
-    color: #1e40af;
-    transition: color 0.2s;
-  }
-  
-  .icon-group a:hover {
-    color: #2563eb; /* Tailwind blue-600 */
-  }
+.header.ff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #fff;
+  min-height: 64px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 
-  .category-dropdown {
-    margin: 0 1rem;
-    padding: 0.4rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
+.ff-nav {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  height: 100%;
+}
+
+.ff-nav-btn {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #8d9096;
+  padding: 0 32px;
+  height: 64px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.ff-nav-btn.active,
+.ff-nav-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
+.ff-logo {
+  font-family: 'Montserrat', 'Arial Black', Arial, sans-serif;
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #111;
+  text-decoration: none;
+  margin: 0 48px;
+  flex: 1;
+  text-align: center;
+}
+
+.ff-search {
+  flex: 2;
+  max-width: 420px;
+  margin: 0 24px;
+}
+
+/* Modern search bar */
+.modern-search {
+  display: flex;
+  align-items: center;
+  background: #f4f6fb;
+  border-radius: 24px;
+  padding: 2px 10px 2px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+
+.modern-search:focus-within {
+  box-shadow: 0 2px 8px rgba(26,35,126,0.10);
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+  padding: 8px 0;
+  width: 180px;
+  transition: width 0.2s;
+}
+
+@media (min-width: 600px) {
+  .search-input {
+    width: 260px;
   }
-  
-  
+}
+
+.search-icon-btn {
+  background: #1a237e;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-icon-btn:hover {
+  background: #3949ab;
+}
+
+.search-icon {
+  color: #fff;
+}
+
+.icon-group.ff-icons {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.icon-group.ff-icons a {
+  color: #111;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.icon-group.ff-icons a:hover {
+  color: #b71c1c;
+}
+
+.ff-cart {
+  position: relative;
+}
+
+.ff-cart-badge {
+  position: absolute;
+  top: -10px;
+  right: -12px;
+  background: #222;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .header.ff-header {
+    flex-wrap: wrap;
+    padding: 0 10px;
+  }
+  .ff-logo {
+    font-size: 1.3rem;
+    margin: 0 10px;
+  }
+  .ff-search {
+    max-width: 200px;
+    margin: 0 8px;
+  }
+  .ff-nav-btn {
+    padding: 0 12px;
+    font-size: 1rem;
+    height: 48px;
+  }
+}

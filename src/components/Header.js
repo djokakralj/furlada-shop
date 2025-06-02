@@ -8,53 +8,67 @@ function Header() {
   const [query, setQuery] = useState('');
   const [, setLocation] = useLocation();
   const { isAdmin } = useAuth();
+  const [active, setActive] = useState('zene');
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      setLocation(`/search?query=${encodeURIComponent(query.trim())}`);
-    }
-  };
-
-  const handleCategorySelect = (e) => {
-    const selectedCategory = e.target.value;
-    if (selectedCategory) {
-      setLocation(`/search?query=${encodeURIComponent(selectedCategory)}`);
-    }
-    window.location.reload();
-  };
+  e.preventDefault();
+  if (query.trim()) {
+    setLocation(`/search?query=${encodeURIComponent(query.trim())}`);
+  }
+};
+  const handleNav = (cat) => {
+  setActive(cat);
+  setLocation(`/search?category=${cat}`);
+  window.location.reload(); // Dodato osvežavanje stranice
+};
 
   return (
-    <header className="header">
-      <Link href="/" className="logo">Furlada</Link>
+    <header className="header ff-header">
+      
+      <nav className="ff-nav">
+        <button
+          className={`ff-nav-btn${active === 'odeca' ? ' active' : ''}`}
+          onClick={() => handleNav('odeca')}
+        >
+          ODECA
+        </button>
+        
+        <button
+          className={`ff-nav-btn${active === 'aksesoari' ? ' active' : ''}`}
+          onClick={() => handleNav('aksesoari')}
+        >
+          AKSESOARI
+        </button>
+        
+       
+      </nav>
 
-      {/* Dropdown za kategorije */}
-      <select className="category-dropdown" onChange={handleCategorySelect} defaultValue="">
-        <option value="" disabled>Izaberi kategoriju</option>
-        <option value="majica">Majice</option>
-        <option value="pantalone">Pantalone</option>
-        <option value="jakna">Jakne</option>
-        <option value="carape">Čarape</option>
-        {/* Dodaj još kategorija ako želiš */}
-      </select>
+      <Link href="/" className="ff-logo">
+        FURLADA
+      </Link>
 
-      <form className="search-bar" onSubmit={handleSearch}>
-        <Search className="search-icon" size={18} />
-        <input
-          type="text"
-          placeholder="Search item, category or brand"
-          className="search-input"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button type="submit" className="search-button">SEARCH</button>
-      </form>
+      <form className="search-bar ff-search" onSubmit={handleSearch}>
+  <div className="modern-search">
+    <input
+      type="text"
+      placeholder="Pretraži artikle, kategoriju ili brend"
+      className="search-input"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    />
+    <button type="submit" className="search-icon-btn">
+      <Search className="search-icon" size={20} />
+    </button>
+  </div>
+</form>
 
-      <div className="icon-group">
+      <div className="icon-group ff-icons">
         {isAdmin && <Link href="/admin"><span style={{fontWeight:600}}>Admin</span></Link>}
-        <Link href="/profile"><User size={20} /></Link>
-        <Link href="/wishlist"><Heart size={20} /></Link>
-        <Link href="/cart"><ShoppingCart size={20} /></Link>
+        <Link href="/profile"><User size={22} /></Link>
+        <Link href="/cart" className="ff-cart">
+          <ShoppingCart size={22} />
+          <span className="ff-cart-badge">0</span>
+        </Link>
       </div>
     </header>
   );

@@ -1,0 +1,191 @@
+.search-page {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+/* Filter sekcija */
+.filters {
+  width: 260px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.filters h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Stil za dugmad boja */
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.color-button {
+  width: 30px;
+  height: 30px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.color-button.active {
+  border-color: #007bff;
+}
+
+.color-button:hover {
+  border-color: #0056b3;
+}
+
+/* Stil za dugmad veličina */
+.size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.size-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f7f7f7;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.size-button.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #0056b3;
+}
+
+.size-button:hover {
+  background: #0056b3;
+  color: #fff;
+}
+
+/* Stil za cenu */
+.price-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.home-page {
+  flex: 1;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Koristimo fiksnu mrežu sa 4 kolone */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+/* Kartica kao flex kontejner za ravnomerno raspoređivanje */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  width: 100%;
+  max-width: 250px;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.product-card-content {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card-content h2 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 0.5rem;
+}
+
+.product-card-content p {
+  font-size: 0.9rem;
+  color: #666;
+  flex: 1;
+  margin-bottom: 0.5rem;
+}
+
+.product-card-content span {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.add-to-cart {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin: 0 1rem 1rem;
+}
+
+.add-to-cart:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive podešavanje na manjim ekranima */
+@media (max-width: 768px) {
+  .search-page {
+    flex-direction: column;
+  }
+  
+  .filters {
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  
+  .product-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

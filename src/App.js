@@ -12,12 +12,13 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import AdminPage from './pages/AdminPage'; // Dodaj import za AdminPage
+import CheckoutPage from './pages/CheckoutPage'; // Dodaj import za CheckoutPage
 
 function App() {
   const [loc] = useLocation();
   return (
     <AuthProvider>
-      <CartProvider>
+      <CartProvider>  
         <Header />
 
         <Switch>
@@ -30,7 +31,8 @@ function App() {
           <Route path="/login" component={LoginPage} />
           <Route path="/profile" component={ProfilePage} />
           <Route path="/register" component={RegisterPage} />
-          <Route path="/admin" component={AdminPage} /> {/* Dodaj admin rutu */}
+          <Route path="/admin" component={AdminPage} />
+          <Route path="/checkout" component={CheckoutPage} /> 
           <Route>404 - Stranica nije pronađena</Route>
         </Switch>
 
