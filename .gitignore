@@ -25,3 +25,4 @@ yarn-error.log*
 "serviceAccountKey.json" 
 ".git.zip" 
 /data/firebase.json
+"firebase.js" 
