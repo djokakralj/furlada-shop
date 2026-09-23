@@ -1,0 +1,142 @@
+.footer {
+  margin-top: auto;
+  background: var(--ink);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.86rem;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  padding-top: 64px;
+  padding-bottom: 56px;
+}
+
+.logo {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-family: var(--font-heading);
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: #fff;
+}
+
+.brand p {
+  max-width: 300px;
+  line-height: 1.7;
+}
+
+.socials {
+  display: flex;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.socials a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.col h4 {
+  margin-bottom: 18px;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col a {
+  transition: color 0.2s;
+}
+
+.col a:hover {
+  color: var(--accent);
+}
+
+.hours {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.bottomInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.legal {
+  display: flex;
+  gap: 20px;
+}
+
+.legal a:hover {
+  color: #fff;
+}
+
+.pay {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr 1fr;
+  }
+  .brand {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 520px) {
+  .main {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding-top: 48px;
+  }
+  .brand {
+    grid-column: auto;
+  }
+  .bottomInner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

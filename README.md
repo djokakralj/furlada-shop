@@ -1,70 +1,59 @@
-# Getting Started with Create React App
+# Furlada Shop
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Online prodavnica odeće i aksesoara — Next.js 16 (App Router) + PostgreSQL (Drizzle ORM) + Better Auth.
 
-## Available Scripts
+## Pokretanje (lokalno)
 
-In the project directory, you can run:
+Potrebno: Node.js 22+, Docker Desktop.
 
-### `npm start`
+```bash
+npm install
+cp .env.example .env          # pa popuniti BETTER_AUTH_SECRET i SEED_ADMIN_*
+npm run db:up                 # Postgres u Dockeru (port 5434)
+npm run db:migrate            # tabele
+npm run db:seed               # test podaci + admin nalog
+npm run dev                   # http://localhost:3000
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Admin panel: `/admin` (nalog iz `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
+Test kupci: `marija.petrovic@example.com`, `jovan.nikolic@example.com`, `ana.jovanovic@example.com` — lozinka `furlada123`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Skripte
 
-### `npm test`
+| Komanda | Šta radi |
+|---|---|
+| `npm run dev` | dev server |
+| `npm run build` / `npm start` | produkcijski build / pokretanje |
+| `npm run typecheck`, `npm run lint` | provere |
+| `npm run db:up` / `db:down` | pokreće / gasi Postgres kontejner |
+| `npm run db:generate` | nova migracija posle izmene `src/db/schema.ts` |
+| `npm run db:migrate` | primenjuje migracije |
+| `npm run db:seed` | puni praznu bazu test podacima |
+| `npm run db:reset` | briše lokalnu bazu, migrira i puni iznova (samo localhost) |
+| `npm run db:studio` | Drizzle Studio — pregled tabela u browseru |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Struktura
 
-### `npm run build`
+```
+src/
+├── app/
+│   ├── (shop)/            # prodavnica: početna, prodavnica, proizvod, korpa, poručivanje,
+│   │                      # porudžbina, nalog, lista želja, info stranice, (auth)/prijava…
+│   ├── admin/             # admin panel: pregled, porudžbine, proizvodi, vrste, korisnici
+│   ├── actions/           # server akcije (checkout, auth, admin, catalog)
+│   ├── api/auth/          # Better Auth endpoint
+│   └── uploads/           # servira slike otpremljene iz admina
+├── components/            # layout (header/footer), product, cart, order, ui, providers
+├── db/                    # Drizzle šema + konekcija
+├── lib/                   # auth, session, queries, admin-queries, storage, validation, utils
+└── proxy.ts               # brza provera sesije za /admin i /nalog
+scripts/                   # seed, reset
+drizzle/                   # SQL migracije
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Produkcija — šta treba podesiti
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Baza:** bilo koji Postgres (Neon, Supabase, VPS…) — samo `DATABASE_URL`, pa `npm run db:migrate`.
+- **Email:** `src/lib/email.ts` trenutno ispisuje poruke u konzolu (reset lozinke, potvrda emaila, potvrda porudžbine). Treba povezati provajdera (Resend, SMTP…).
+- **Slike:** `src/lib/storage.ts` čuva otpremljene slike na disk (`uploads/`). Na VPS-u radi kako jeste; za serverless hosting zameniti S3/R2/Blob storage-om.
+- `BETTER_AUTH_URL` i `NEXT_PUBLIC_SITE_URL` postaviti na pravi domen.

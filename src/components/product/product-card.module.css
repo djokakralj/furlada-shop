@@ -1,0 +1,223 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.imageLink {
+  position: absolute;
+  inset: 0;
+}
+
+.image {
+  object-fit: cover;
+  transition:
+    transform 0.8s var(--ease),
+    opacity 0.5s var(--ease);
+}
+
+.imageSecondary {
+  opacity: 0;
+}
+
+.card:hover .image {
+  transform: scale(1.03);
+}
+
+.card:hover .imagePrimary {
+  opacity: 0;
+}
+
+.card:hover .imageSecondary {
+  opacity: 1;
+}
+
+.noImage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--subtle);
+  font-size: 0.8rem;
+}
+
+.badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.badge {
+  padding: 4px 9px;
+  background: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.badgeSale {
+  background: var(--danger);
+  color: #fff;
+}
+
+.wish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  transition:
+    transform 0.2s,
+    color 0.2s;
+}
+
+.wish:hover {
+  transform: scale(1.08);
+}
+
+.wishActive {
+  color: var(--danger);
+}
+
+.quick {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateY(calc(100% + 12px));
+  transition: transform 0.35s var(--ease);
+}
+
+.card:hover .quick,
+.quick:focus-within {
+  transform: translateY(0);
+}
+
+.quickLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.quickSizes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.quickSizes button {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.quickSizes button:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.quickAdd {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.quickAdd:hover {
+  background: var(--ink-soft);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 14px;
+}
+
+.sub {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.name a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.priceSale {
+  color: var(--danger);
+}
+
+.priceOld {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--subtle);
+}
+
+/* Na dodirnim ekranima nema hovera — brzo dodavanje je na stranici proizvoda */
+@media (hover: none) {
+  .quick {
+    display: none;
+  }
+}

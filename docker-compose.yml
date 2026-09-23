@@ -1,0 +1,24 @@
+# Lokalna baza za razvoj. U produkciji se koristi hostovani Postgres —
+# dovoljno je promeniti DATABASE_URL u .env.
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: furlada-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: furlada
+      POSTGRES_PASSWORD: furlada
+      POSTGRES_DB: furlada
+    ports:
+      # 5432/5433 zauzimaju lokalno instalirani Postgres servisi
+      - "5434:5432"
+    volumes:
+      - furlada-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U furlada -d furlada"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  furlada-db-data:
