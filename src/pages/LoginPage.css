@@ -1,20 +1,29 @@
 .login-page {
-  max-width: 400px;
-  margin: 40px auto;
-  background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  padding: 32px 28px 24px 28px;
-  color: #fff;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  max-width: 420px;
+  margin: 72px auto;
+  padding: 48px 40px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  font-family: var(--font-body);
 }
 
 .login-page h2 {
+  font-family: var(--font-heading);
   text-align: center;
   margin-bottom: 8px;
-  font-size: 1.7rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.login-subtitle {
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
 }
 
 .login-page form {
@@ -24,79 +33,141 @@
 }
 
 .login-page label {
-  font-size: 1rem;
-  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 6px;
+  display: block;
 }
 
 .login-page input[type="text"],
-.login-page input[type="password"] {
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: none;
-  font-size: 1rem;
-  margin-bottom: 4px;
+.login-page input[type="password"],
+.login-page input[type="email"],
+.login-page input[type="tel"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--gray-200);
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: var(--white);
   outline: none;
-  background: #f7f7f7;
-  color: #222;
+  transition: border-color 0.2s;
 }
 
 .login-page input[type="text"]:focus,
-.login-page input[type="password"]:focus {
-  border: 1.5px solid #2c5364;
+.login-page input[type="password"]:focus,
+.login-page input[type="email"]:focus,
+.login-page input[type="tel"]:focus {
+  border-color: var(--primary);
 }
 
 .login-page .remember-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
 }
 
 .login-page .remember-row label {
-  font-size: 0.97rem;
-  color: #e0e0e0;
+  font-size: 0.8rem;
+  color: var(--gray-600);
   margin-bottom: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 
 .login-page .forgot-link {
-  color: #b3e0ff;
-  font-size: 0.97rem;
+  color: var(--primary-light);
+  font-size: 0.8rem;
   text-decoration: underline;
-  margin-bottom: 8px;
   cursor: pointer;
   display: inline-block;
+  transition: color 0.2s;
+}
+
+.login-page .forgot-link:hover {
+  color: var(--accent);
 }
 
 .login-page button[type="submit"] {
-  background: #000;
-  color: #fff;
-  font-size: 1.1rem;
-  padding: 10px 0;
-  border: none;
-  border-radius: 6px;
+  background: var(--primary);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 14px 0;
+  border: 1px solid var(--primary);
   cursor: pointer;
   margin-top: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
 }
 
 .login-page button[type="submit"]:hover {
-  background: #222;
+  background: var(--white);
+  color: var(--primary);
+}
+
+.login-page button[type="submit"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--primary);
+  color: var(--white);
 }
 
 .login-page .register-row {
   text-align: center;
-  margin-top: 16px;
-  font-size: 1rem;
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--gray-600);
 }
 
 .login-page .register-link {
-  color: #b3e0ff;
+  color: var(--primary);
   text-decoration: underline;
   margin-left: 4px;
   cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s;
 }
 
-.login-page p[style] {
+.login-page .register-link:hover {
+  color: var(--accent);
+}
+
+.login-page p {
   text-align: center;
-  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+
+.login-error {
+  color: #c0392b;
+  font-size: 0.82rem;
+  text-align: center;
+  margin: 0;
+}
+
+.login-success {
+  color: #1a7a4a;
+  font-size: 0.82rem;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .login-page {
+    margin: 32px 16px;
+    padding: 32px 20px;
+    max-width: unset;
+  }
+  .login-page h2 {
+    font-size: 1.6rem;
+  }
 }

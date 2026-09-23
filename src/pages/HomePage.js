@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HomePage.css';
-import { FaInstagram,FaArrowRight } from 'react-icons/fa';
+import { ArrowRight } from 'lucide-react';
 import { getProducts } from '../data/products';
 import { Link } from 'wouter';
 import ProductCard from '../components/ProductCard';
@@ -24,9 +24,6 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
-  if (loading) return <p>Učitavanje proizvoda...</p>;
-  if (error) return <p>Greška: {error.message}</p>;
-
  return (
     <div className="home-page">
       {/* HERO */}
@@ -38,7 +35,7 @@ const HomePage = () => {
           <Link href="/search">
             <button className="hero-btn">
               Pogledaj kolekciju
-              <FaArrowRight style={{ marginLeft: 8 }} />
+              <ArrowRight size={18} />
             </button>
           </Link>
         </div>
@@ -68,25 +65,24 @@ const HomePage = () => {
           <h2>Izdvajamo iz ponude</h2>
           <Link href="/search" className="view-all">Pogledaj sve</Link>
         </div>
-        <div className="product-grid">
-          {products.slice(0, 4).map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {error ? (
+          <p className="featured-error">Greška pri učitavanju proizvoda. Pokušajte ponovo kasnije.</p>
+        ) : (
+          <div className="product-grid">
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="product-card-skeleton">
+                    <div className="skeleton-img" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line skeleton-line--short" />
+                  </div>
+                ))
+              : products.slice(0, 4).map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+          </div>
+        )}
       </section>
-        {/*
-      {/* PROMO BANNER *
-      <section className="promo-section">
-        <div className="promo-content">
-          <h2>Letnja rasprodaja</h2>
-          <p>Do 40% popusta na odabrane artikle</p>
-          <Link href="/search?cat=outlet">
-            <button className="promo-btn">Istraži ponudu</button>
-          </Link>
-        </div>
-      </section>
-        */}
-      
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../data/firebase.js';
 import { setDoc, doc } from 'firebase/firestore';
@@ -18,9 +18,11 @@ function RegisterPage() {
   const [number, setNumber] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  if (submitting) return;
   setError('');
   setSuccess('');
   if (!name || !surname || !phone || !street || !number || !postalCode || !city) {
@@ -33,6 +35,7 @@ const handleSubmit = async (e) => {
     setError('Lozinka mora imati najmanje 8 karaktera, jedno veliko slovo, jedno malo slovo i jedan broj.');
     return;
   }
+  setSubmitting(true);
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     // Upis u Firestore
@@ -48,10 +51,12 @@ const handleSubmit = async (e) => {
         city,
       },
     });
-    setSuccess('Uspešno ste se registrovali! Sada se možete prijaviti.');
-    setTimeout(() => setLocation('/login'), 2000);
+    // createUserWithEmailAndPassword odmah i uloguje korisnika — vodi ga na profil
+    setSuccess('Uspešno ste se registrovali! Dobrodošli.');
+    setTimeout(() => setLocation('/profile'), 1500);
   } catch (err) {
     setError('Greška pri registraciji: ' + err.message);
+    setSubmitting(false);
   }
 };
 
@@ -134,12 +139,14 @@ const handleSubmit = async (e) => {
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-        <button type="submit">Registruj se</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+        <button type="submit" disabled={submitting}>
+          {submitting ? 'Registracija...' : 'Registruj se'}
+        </button>
+        {error && <p className="login-error">{error}</p>}
+        {success && <p className="login-success">{success}</p>}
       </form>
       <div className="register-row">
-        Već imate nalog? <a className="register-link" href="/login">Prijavite se</a>
+        Već imate nalog? <Link className="register-link" href="/login">Prijavite se</Link>
       </div>
     </div>
   );

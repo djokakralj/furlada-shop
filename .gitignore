@@ -21,8 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-"serviceAccountKey.json" 
-"serviceAccountKey.json" 
-".git.zip" 
-/data/firebase.json
-"firebase.js" 
+# secrets — NIKAD ne commit-ovati
+serviceAccountKey.json
+.git.zip
+src/data/firebase.js
+.env

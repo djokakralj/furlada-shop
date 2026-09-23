@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { db } from '../data/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import './ProfilePage.css';
 
 function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [userData, setUserData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({});
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
       setLocation('/login');
       return;
@@ -35,9 +37,24 @@ function ProfilePage() {
         });
       }
     };
+    const fetchOrders = async () => {
+      try {
+        // Bez orderBy — where + orderBy traži kompozitni Firestore indeks,
+        // pa sortiramo klijentski da lista radi i bez njega
+        const q = query(collection(db, 'orders'), where('userId', '==', user.uid));
+        const snap = await getDocs(q);
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setOrders(list);
+      } catch (err) {
+        console.error('Greška pri učitavanju porudžbina:', err);
+      }
+    };
     fetchUserData();
-  }, [user, setLocation]);
+    fetchOrders();
+  }, [user, authLoading, setLocation]);
 
+  if (authLoading) return null;
   if (!user) return null;
 
   const handleChange = e => {
@@ -120,6 +137,23 @@ function ProfilePage() {
           Odjavi se
         </button>
       </div>
+
+      {orders.length > 0 && (
+        <div className="profile-orders">
+          <h3>Moje porudžbine</h3>
+          <ul>
+            {orders.map(o => (
+              <li key={o.id}>
+                <Link href={`/order/${o.id}`} className="profile-order-link">
+                  <span>#{o.id.slice(0, 8).toUpperCase()}</span>
+                  <span>{Number(o.total).toLocaleString('sr-RS')} RSD</span>
+                  <span className="profile-order-status">{o.status || 'primljena'}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

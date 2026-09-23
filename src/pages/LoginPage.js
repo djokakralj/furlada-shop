@@ -1,17 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import './LoginPage.css';
-import { setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
+import { setPersistence, browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../data/firebase';
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [resetMsg, setResetMsg] = useState('');
+
+  // Već ulogovan korisnik nema šta da traži na login stranici
+  useEffect(() => {
+    if (!loading && user) setLocation('/profile');
+  }, [user, loading, setLocation]);
+
+  const handleForgotPassword = async () => {
+    if (!username) {
+      setError('Unesite email adresu za reset lozinke.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, username);
+      setResetMsg('Email za reset lozinke je poslat. Proverite inbox.');
+      setError('');
+    } catch {
+      setError('Greška pri slanju emaila. Proverite da li je email ispravno unesen.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +46,7 @@ function LoginPage() {
       if (success) {
         setLocation('/profile');
       } else {
-        setError('Pogrešno korisničko ime ili lozinka. Proverite podatke i pokušajte ponovo.');
+        setError('Pogrešna email adresa ili lozinka. Proverite podatke i pokušajte ponovo.');
       }
     } catch (err) {
       setError('Greška pri prijavi. Pokušajte ponovo.');
@@ -37,14 +57,14 @@ function LoginPage() {
     <div className="login-page">
       <h2>Prijava</h2>
       <p style={{ textAlign: 'center', marginBottom: 18 }}>
-        Prijavite se svojim korisničkim imenom i lozinkom
+        Prijavite se svojom email adresom i lozinkom
       </p>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="username">Vaše korisničko ime</label>
+        <label htmlFor="username">Email adresa</label>
         <input
           id="username"
-          type="text"
-          placeholder="Unesite korisničko ime"
+          type="email"
+          placeholder="Unesite email adresu"
           value={username}
           onChange={e => setUsername(e.target.value)}
         />
@@ -65,12 +85,13 @@ function LoginPage() {
           />
           <label htmlFor="remember">Zapamti me</label>
         </div>
-        <a className="forgot-link" href="#">Zaboravljena lozinka?</a>
+        <span className="forgot-link" onClick={handleForgotPassword}>Zaboravljena lozinka?</span>
         <button type="submit">Prijavi se</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="login-error">{error}</p>}
+        {resetMsg && <p className="login-success">{resetMsg}</p>}
       </form>
       <div className="register-row">
-        Niste član? <a className="register-link" href="/register">Registrujte se</a>
+        Niste član? <Link className="register-link" href="/register">Registrujte se</Link>
       </div>
     </div>
   );

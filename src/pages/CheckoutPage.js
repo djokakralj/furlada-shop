@@ -3,6 +3,8 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../data/firebase';
 import { doc, getDoc, collection, addDoc, Timestamp } from 'firebase/firestore';
+import { Link } from 'wouter';
+import { NO_IMAGE } from '../data/constants';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
@@ -22,7 +24,9 @@ const CheckoutPage = () => {
     payment: 'pouzece',
   });
   const [success, setSuccess] = useState('');
+  const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // AUTOMATSKO POPUNJAVANJE PODATAKA AKO JE ULOGOVAN
   useEffect(() => {
@@ -51,24 +55,34 @@ const CheckoutPage = () => {
     fetchUserData();
   }, [user]);
 
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+  const DELIVERY_COST = 300;
+  const itemsTotal = cartItems.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+  const deliveryCost = form.delivery === 'kurir' ? DELIVERY_COST : 0;
+  const totalPrice = itemsTotal + deliveryCost;
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Adresa je obavezna samo za kurirsku dostavu
+  const needsAddress = form.delivery === 'kurir';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.surname || !form.phone || !form.email || !form.street || !form.number || !form.postalCode || !form.city) {
+    if (submitting) return;
+    const missingBase = !form.name || !form.surname || !form.phone || !form.email;
+    const missingAddress = needsAddress && (!form.street || !form.number || !form.postalCode || !form.city);
+    if (missingBase || missingAddress) {
       setError('Popunite sva obavezna polja.');
       setSuccess('');
       return;
     }
     setError('');
     setSuccess('');
+    setSubmitting(true);
 
     try {
-      await addDoc(collection(db, "orders"), {
+      const docRef = await addDoc(collection(db, "orders"), {
         userId: user ? user.uid : null,
         userEmail: form.email,
         customer: {
@@ -76,12 +90,12 @@ const CheckoutPage = () => {
           surname: form.surname,
           phone: form.phone,
           email: form.email,
-          address: {
+          address: needsAddress ? {
             street: form.street,
             number: form.number,
             postalCode: form.postalCode,
             city: form.city,
-          },
+          } : null,
         },
         delivery: form.delivery,
         payment: form.payment,
@@ -90,17 +104,33 @@ const CheckoutPage = () => {
         createdAt: Timestamp.now(),
         status: "primljena"
       });
+      setOrderId(docRef.id);
       clearCart(); // Isprazni korpu
       setSuccess('Hvala na kupovini! Vaša porudžbina je uspešno poslata.');
     } catch (err) {
       setError('Greška pri slanju porudžbine: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (success) {
     return (
-      <div className="checkout-empty">
-        <h2>{success}</h2>
+      <div className="checkout-success-screen">
+        <div className="checkout-success-icon">✓</div>
+        <h2>Hvala na kupovini!</h2>
+        <p>Vaša porudžbina je uspešno primljena. Kontaktiraćemo vas uskoro.</p>
+        {orderId && (
+          <p style={{ marginBottom: 8 }}>
+            Broj porudžbine: <strong>#{orderId.slice(0, 8).toUpperCase()}</strong>
+          </p>
+        )}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {orderId && (
+            <Link href={`/order/${orderId}`} className="checkout-success-btn">Prati porudžbinu</Link>
+          )}
+          <Link href="/" className="checkout-success-btn">Nastavi kupovinu</Link>
+        </div>
       </div>
     );
   }
@@ -109,6 +139,8 @@ const CheckoutPage = () => {
     return (
       <div className="checkout-empty">
         <h2>Vaša korpa je prazna</h2>
+        <p>Dodajte proizvode u korpu pre nastavka.</p>
+        <Link href="/search" className="checkout-success-btn">Pogledaj proizvode</Link>
       </div>
     );
   }
@@ -125,14 +157,6 @@ const CheckoutPage = () => {
           <input name="phone" placeholder="Telefon" value={form.phone} onChange={handleChange} required />
           <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
         </div>
-        <div className="checkout-row">
-          <input name="street" placeholder="Ulica" value={form.street} onChange={handleChange} required />
-          <input name="number" placeholder="Broj" value={form.number} onChange={handleChange} required />
-        </div>
-        <div className="checkout-row">
-          <input name="postalCode" placeholder="Poštanski broj" value={form.postalCode} onChange={handleChange} required />
-          <input name="city" placeholder="Grad" value={form.city} onChange={handleChange} required />
-        </div>
         <div className="checkout-section">
           <label>Način dostave:</label>
           <div className="checkout-radio-group">
@@ -146,6 +170,18 @@ const CheckoutPage = () => {
             </label>
           </div>
         </div>
+        {needsAddress && (
+          <>
+            <div className="checkout-row">
+              <input name="street" placeholder="Ulica" value={form.street} onChange={handleChange} required />
+              <input name="number" placeholder="Broj" value={form.number} onChange={handleChange} required />
+            </div>
+            <div className="checkout-row">
+              <input name="postalCode" placeholder="Poštanski broj" value={form.postalCode} onChange={handleChange} required />
+              <input name="city" placeholder="Grad" value={form.city} onChange={handleChange} required />
+            </div>
+          </>
+        )}
         <div className="checkout-section">
           <label>Način plaćanja:</label>
           <div className="checkout-radio-group">
@@ -160,14 +196,20 @@ const CheckoutPage = () => {
           </div>
         </div>
         {error && <div className="checkout-error">{error}</div>}
-        <button className="checkout-btn" type="submit">Potvrdi porudžbinu</button>
+        <button className="checkout-btn" type="submit" disabled={submitting}>
+          {submitting ? 'Slanje...' : 'Potvrdi porudžbinu'}
+        </button>
       </form>
       <div className="checkout-summary">
         <h3>Vaša porudžbina</h3>
         <ul>
           {cartItems.map((item, idx) => (
             <li key={idx} className="checkout-summary-item">
-              <img src={item.imageUrl} alt={item.name} />
+              <img
+                src={item.imageUrl || NO_IMAGE}
+                alt={item.name}
+                onError={(e) => { e.target.src = NO_IMAGE; }}
+              />
               <div>
                 <div className="checkout-summary-name">{item.name}</div>
                 <div className="checkout-summary-meta">
@@ -177,14 +219,18 @@ const CheckoutPage = () => {
                 </div>
               </div>
               <div className="checkout-summary-price">
-                {(item.price * (item.quantity || 1)).toLocaleString()} RSD
+                {(item.price * (item.quantity || 1)).toLocaleString('sr-RS')} RSD
               </div>
             </li>
           ))}
         </ul>
+        <div className="checkout-summary-total" style={{ fontWeight: 400, fontSize: '0.88rem', borderTop: 'none', paddingTop: 0, marginTop: 4 }}>
+          <span>Dostava:</span>
+          <span>{deliveryCost === 0 ? 'Besplatno' : `${deliveryCost.toLocaleString('sr-RS')} RSD`}</span>
+        </div>
         <div className="checkout-summary-total">
           <span>Ukupno:</span>
-          <span>{totalPrice.toLocaleString()} RSD</span>
+          <span>{totalPrice.toLocaleString('sr-RS')} RSD</span>
         </div>
       </div>
     </div>

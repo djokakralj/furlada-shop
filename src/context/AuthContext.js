@@ -2,12 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../data/firebase';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useCart } from './CartContext'; 
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { clearCart } = useCart();
 
   // Check if user is admin
   const checkAdmin = async (firebaseUser) => {
@@ -22,9 +25,10 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      checkAdmin(firebaseUser);
+      await checkAdmin(firebaseUser);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -40,8 +44,10 @@ export function AuthProvider({ children }) {
   };
 
   // Logout function
-  const logout = () => signOut(auth);
-
+  const logout = async () => {
+    await signOut(auth);
+    clearCart(); 
+  };
   // Add a function to check admin status manually
   const checkIfAdmin = async (email) => {
     const q = query(collection(db, "admins"), where("email", "==", email));
@@ -50,7 +56,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, login, logout, checkIfAdmin }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, login, logout, checkIfAdmin }}>
       {children}
     </AuthContext.Provider>
   );

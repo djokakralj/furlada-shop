@@ -16,12 +16,15 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   // Dodavanje proizvoda u korpu (povećava količinu ako već postoji)
+  const cartKey = (item) => `${item.id}__${item.size || ''}__${item.color || ''}`;
+
   const addToCart = (product) => {
     setCartItems((prevItems) => {
-      const existing = prevItems.find(item => item.id === product.id);
+      const key = cartKey(product);
+      const existing = prevItems.find(item => cartKey(item) === key);
       if (existing) {
         return prevItems.map(item =>
-          item.id === product.id
+          cartKey(item) === key
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
         );
@@ -30,17 +33,15 @@ export function CartProvider({ children }) {
     });
   };
 
-  // Uklanjanje proizvoda iz korpe (uklanja ceo proizvod)
-  const removeFromCart = (id) => {
-    setCartItems((prevItems) => prevItems.filter(item => item.id !== id));
+  const removeFromCart = (key) => {
+    setCartItems((prevItems) => prevItems.filter(item => cartKey(item) !== key));
   };
 
-  // Menjanje količine proizvoda
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = (key, quantity) => {
     setCartItems((prevItems) =>
       prevItems
         .map(item =>
-          item.id === id
+          cartKey(item) === key
             ? { ...item, quantity: Math.max(1, quantity) }
             : item
         )
@@ -53,7 +54,7 @@ export function CartProvider({ children }) {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ cartItems, cartKey, addToCart, removeFromCart, updateQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   );

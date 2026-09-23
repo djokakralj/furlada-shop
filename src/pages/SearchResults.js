@@ -1,212 +1,351 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'wouter';
-import { useCart } from '../context/CartContext';
+import React, { useEffect, useState, useCallback } from 'react';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { colorTranslationMap, SIZE_ORDER } from '../data/constants';
+import ProductCard from '../components/ProductCard';
 import './SearchResults.css';
 
+function FilterSection({ title, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="filter-section">
+      <button
+        className={`filter-section-header${open ? ' open' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        type="button"
+      >
+        <span>{title}</span>
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </button>
+      {open && <div className="filter-section-body">{children}</div>}
+    </div>
+  );
+}
+
 function SearchResults() {
+  const [allProducts, setAllProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    price: { min: 0, max: 1000000 },
-    color: '',
-    size: '',
-  });
   const [availableColors, setAvailableColors] = useState([]);
-  const { addToCart } = useCart();
+  const [availableSizes, setAvailableSizes] = useState([]);
+  const [filters, setFilters] = useState({ priceMin: '', priceMax: '', color: '', size: '' });
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('default');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Čitanje query parametara iz URL-a
   const searchParams = new URLSearchParams(window.location.search);
   const categoryParam = searchParams.get('category')?.toLowerCase() || '';
+  const subcategoryParam = searchParams.get('subcategory')?.toLowerCase() || '';
+  const genderParam = searchParams.get('gender')?.toLowerCase() || '';
   const queryParam = searchParams.get('query')?.toLowerCase() || '';
 
-  // Mapa za prevođenje boja
-  const colorTranslationMap = {
-    crvena: '#f2111c',
-    plava: '#13187d',
-    zelena: '#7fc24b',
-    žuta: '#f2ff00',
-    narandžasta: '#ff8000',
-    ljubičasta: '#800080',
-    bela: '#ffffff',
-    crna: '#000000',
-    siva: '#aba9a9',
-    roze: '#f76cf7',
-    braon: '#914038',
-    zlatna: '#ffd700',
-    srebrna: '#c0c0c0',
-    maslinasta: '#59704c',
-    jeans: '#5d6d7e',
-    tirkizna: '#48d1cc',
-  };
-
   useEffect(() => {
-    async function fetchAndFilterProducts() {
+    const handle = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handle);
+    return () => window.removeEventListener('resize', handle);
+  }, []);
+
+  // Fetch from Firestore — only when category/query changes
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
       const db = getFirestore();
-      const productsRef = collection(db, 'products');
-      let q = query(productsRef);
-      if (categoryParam) {
-        q = query(q, where('category', '==', categoryParam));
-      }
+      let q = query(collection(db, 'products'));
+      if (categoryParam) q = query(q, where('category', '==', categoryParam));
 
-      // Dohvatanje proizvoda iz Firestore-a
-      const querySnapshot = await getDocs(q);
-      const allProducts = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const snapshot = await getDocs(q);
+      const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // Dinamičko izvlačenje dostupnih boja
-      const colorsSet = new Set();
-      allProducts.forEach((product) => {
-        if (product.color) {
-          colorsSet.add(product.color);
+      const results = products.filter(p => {
+        // Filter po podkategoriji (npr. "Haljine") — case-insensitive
+        if (subcategoryParam && p.subcategory?.toLowerCase() !== subcategoryParam) {
+          return false;
         }
-      });
-      setAvailableColors(Array.from(colorsSet));
-
-      // Filtriranje na osnovu query parametara
-      const results = allProducts.filter((product) => {
-        const matchesQuery =
-          product.name.toLowerCase().includes(queryParam) ||
-          product.description?.toLowerCase().includes(queryParam) ||
-          product.brand?.toLowerCase().includes(queryParam);
-        return matchesQuery;
-      });
-
-      // Filtriranje na osnovu cena, boje i (ako nije aksesoari) veličine
-      const filteredResults = results.filter((product) => {
-        const matchesPrice =
-          product.price >= filters.price.min && product.price <= filters.price.max;
-        const matchesColor = filters.color
-          ? product.color?.toLowerCase() === filters.color.toLowerCase()
-          : true;
-        const matchesSize = categoryParam === 'aksesoari'
-          ? true // Kod aksesoara ne proveravamo veličinu
-          : filters.size
-            ? Array.isArray(product.sizes) && product.sizes.some(
-                (size) => size.toLowerCase() === filters.size.toLowerCase()
-              )
-            : true;
-        return matchesPrice && matchesColor && matchesSize;
+        // Filter po polu — proizvodi bez gendera ili 'unisex' se prikazuju svuda
+        if (genderParam) {
+          const g = p.gender?.toLowerCase();
+          if (g && g !== 'unisex' && g !== genderParam) return false;
+        }
+        if (!queryParam) return true;
+        return (
+          p.name?.toLowerCase().includes(queryParam) ||
+          p.description?.toLowerCase().includes(queryParam) ||
+          p.brand?.toLowerCase().includes(queryParam)
+        );
       });
 
-      setFiltered(filteredResults);
+      const colorsSet = new Set();
+      const sizesSet = new Set();
+      results.forEach(p => {
+        if (p.color) colorsSet.add(p.color);
+        if (Array.isArray(p.sizes)) p.sizes.forEach(s => sizesSet.add(s));
+      });
+
+      setAvailableColors([...colorsSet]);
+      setAvailableSizes(
+        [...sizesSet].sort((a, b) => {
+          const ai = SIZE_ORDER.indexOf(a.toUpperCase());
+          const bi = SIZE_ORDER.indexOf(b.toUpperCase());
+          if (ai !== -1 && bi !== -1) return ai - bi;
+          return a.localeCompare(b);
+        })
+      );
+      setAllProducts(results);
       setLoading(false);
     }
-    fetchAndFilterProducts();
-  }, [window.location.search, filters]);
+    fetchProducts();
+  }, [categoryParam, subcategoryParam, genderParam, queryParam]);
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: name === 'price' ? JSON.parse(value) : value,
-    }));
-  };
+  // Client-side filtering — instant, no extra Firestore queries
+  useEffect(() => {
+    const min = filters.priceMin !== '' ? Number(filters.priceMin) : 0;
+    const max = filters.priceMax !== '' ? Number(filters.priceMax) : Infinity;
 
-  return (
-    <div className="search-page">
-      <aside className="filters">
-        <h3>Filteri</h3>
+    setFiltered(
+      allProducts.filter(p => {
+        const matchesPrice = p.price >= min && p.price <= max;
+        const matchesColor = filters.color
+          ? p.color?.toLowerCase() === filters.color.toLowerCase()
+          : true;
+        const matchesSize =
+          categoryParam === 'aksesoari'
+            ? true
+            : filters.size
+            ? Array.isArray(p.sizes) &&
+              p.sizes.some(s => s.toLowerCase() === filters.size.toLowerCase())
+            : true;
+        return matchesPrice && matchesColor && matchesSize;
+      })
+    );
+  }, [allProducts, filters, categoryParam]);
 
-        {/* Filter za cenu */}
-        <div className="filter-group">
-          <label htmlFor="price">Cena:</label>
-          <input
-            type="range"
-            id="price"
-            name="price"
-            min="0"
-            max="50000"
-            step="1000"
-            onChange={(e) =>
-              setFilters((prevFilters) => ({
-                ...prevFilters,
-                price: { ...prevFilters.price, max: Number(e.target.value) },
-              }))
-            }
-          />
-          <div className="price-values">
-            <span>{filters.price.min} RSD</span>
-            <span>{filters.price.max} RSD</span>
+  const resetFilters = useCallback(() => {
+    setFilters({ priceMin: '', priceMax: '', color: '', size: '' });
+  }, []);
+
+  const activeFilterCount = [
+    filters.priceMin !== '',
+    filters.priceMax !== '',
+    filters.color !== '',
+    filters.size !== '',
+  ].filter(Boolean).length;
+
+  // Naslov stranice — pokazuje kontekst pretrage/kategorije
+  const genderLabel = genderParam === 'zene' ? ' za žene' : genderParam === 'muskarci' ? ' za muškarce' : '';
+  const pageTitle = queryParam
+    ? `Rezultati za „${queryParam}"`
+    : subcategoryParam
+    ? subcategoryParam.charAt(0).toUpperCase() + subcategoryParam.slice(1) + genderLabel
+    : categoryParam
+    ? (categoryParam === 'odeca' ? 'Odeća' : categoryParam === 'aksesoari' ? 'Aksesoari' : categoryParam) + genderLabel
+    : 'Svi proizvodi';
+
+  const sortedResults = [...filtered].sort((a, b) => {
+    if (sortBy === 'price-asc') return a.price - b.price;
+    if (sortBy === 'price-desc') return b.price - a.price;
+    return 0;
+  });
+
+  // Paginacija ("Prikaži još") — resetuje se kad se promene rezultati ili sortiranje
+  const PAGE_SIZE = 12;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filtered, sortBy]);
+  const visibleResults = sortedResults.slice(0, visibleCount);
+
+  const FilterPanel = (
+    <aside className={`filters-panel${isMobile ? ' filters-panel--mobile' : ''}${isMobile && filtersOpen ? ' filters-panel--open' : ''}`}>
+      <div className="filters-header">
+        <span className="filters-title">Filteri</span>
+        {activeFilterCount > 0 && (
+          <button className="filters-reset" onClick={resetFilters} type="button">
+            Obriši sve <X size={13} />
+          </button>
+        )}
+      </div>
+
+      {/* Price */}
+      <FilterSection title="Cena">
+        <div className="price-inputs">
+          <div className="price-input-wrap">
+            <input
+              type="number"
+              className="price-input"
+              placeholder="Min"
+              min={0}
+              value={filters.priceMin}
+              onChange={e => setFilters(f => ({ ...f, priceMin: e.target.value }))}
+            />
+            <span className="price-currency">RSD</span>
+          </div>
+          <span className="price-separator">—</span>
+          <div className="price-input-wrap">
+            <input
+              type="number"
+              className="price-input"
+              placeholder="Max"
+              min={0}
+              value={filters.priceMax}
+              onChange={e => setFilters(f => ({ ...f, priceMax: e.target.value }))}
+            />
+            <span className="price-currency">RSD</span>
           </div>
         </div>
+      </FilterSection>
 
-        {/* Filter za boje */}
-        <div className="filter-group">
-          <label>Boja:</label>
-          <div className="color-options">
-            {availableColors.map((color, index) => {
-              const translatedColor = colorTranslationMap[color.toLowerCase()] || color;
+      {/* Color */}
+      {availableColors.length > 0 && (
+        <FilterSection title="Boja">
+          <div className="color-list">
+            {availableColors.map((color, i) => {
+              const hex = colorTranslationMap[color.toLowerCase()] || color;
+              const isLight = ['#ffffff', '#f2ff00'].includes(hex);
+              const isActive = filters.color === color;
               return (
                 <button
-                  key={index}
-                  className={`color-button ${
-                    filters.color === color ? "active" : ""
-                  }`}
-                  style={{ backgroundColor: translatedColor }}
+                  key={i}
+                  className={`color-row${isActive ? ' color-row--active' : ''}`}
                   onClick={() =>
-                    setFilters((prevFilters) => ({
-                      ...prevFilters,
-                      color: filters.color === color ? "" : color,
-                    }))
+                    setFilters(f => ({ ...f, color: f.color === color ? '' : color }))
                   }
-                ></button>
+                  type="button"
+                >
+                  <span
+                    className="color-dot"
+                    style={{
+                      background: hex,
+                      ...(isLight ? { border: '1px solid #ccc' } : {}),
+                    }}
+                  />
+                  <span>{color.charAt(0).toUpperCase() + color.slice(1)}</span>
+                  {isActive && <Check size={13} className="color-check" />}
+                </button>
               );
             })}
           </div>
-        </div>
+        </FilterSection>
+      )}
 
-        {/* Filter za veličine */}
-        {categoryParam !== "aksesoari" && (
-          <div className="filter-group">
-            <label>Veličina:</label>
-            <div className="size-options">
-              {["XS", "S", "M", "L", "XL"].map((size) => (
-                <button
-                  key={size}
-                  className={`size-button ${
-                    filters.size === size ? "active" : ""
-                  }`}
-                  onClick={() =>
-                    setFilters((prevFilters) => ({
-                      ...prevFilters,
-                      size: filters.size === size ? "" : size,
-                    }))
-                  }
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
+      {/* Size */}
+      {categoryParam !== 'aksesoari' && availableSizes.length > 0 && (
+        <FilterSection title="Veličina">
+          <div className="size-pills">
+            {availableSizes.map(size => (
+              <button
+                key={size}
+                className={`size-pill${filters.size === size ? ' size-pill--active' : ''}`}
+                onClick={() =>
+                  setFilters(f => ({ ...f, size: f.size === size ? '' : size }))
+                }
+                type="button"
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+      )}
+    </aside>
+  );
+
+  return (
+    <div className="search-page">
+
+      {/* Mobile filter bar */}
+      {isMobile && (
+        <div className="mobile-filter-bar">
+          <button
+            className="mobile-filter-toggle"
+            onClick={() => setFiltersOpen(o => !o)}
+            type="button"
+          >
+            <SlidersHorizontal size={16} />
+            <span>Filteri</span>
+            {activeFilterCount > 0 && (
+              <span className="filter-badge">{activeFilterCount}</span>
+            )}
+          </button>
+          <select
+            className="search-sort-select"
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+          >
+            <option value="default">Podrazumevano</option>
+            <option value="price-asc">Cena: rastuće</option>
+            <option value="price-desc">Cena: opadajuće</option>
+          </select>
+        </div>
+      )}
+
+      {/* Mobile overlay backdrop */}
+      {isMobile && filtersOpen && (
+        <div className="filters-overlay" onClick={() => setFiltersOpen(false)} />
+      )}
+
+      {/* Filter panel */}
+      {(!isMobile || filtersOpen) && FilterPanel}
+
+      {/* Results */}
+      <div className="results-area">
+        <h1 className="search-page-title">{pageTitle}</h1>
+        {!isMobile && (
+          <div className="search-results-header">
+            <span className="search-results-count">
+              {loading
+                ? 'Učitavanje...'
+                : `${filtered.length} ${filtered.length === 1 ? 'proizvod' : 'proizvoda'}`}
+            </span>
+            <select
+              className="search-sort-select"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+            >
+              <option value="default">Sortiraj: Podrazumevano</option>
+              <option value="price-asc">Cena: rastuće</option>
+              <option value="price-desc">Cena: opadajuće</option>
+            </select>
           </div>
         )}
-      </aside>
 
-      <div className="home-page">
-        <h2 className="text-xl font-bold mb-4 text-center">Rezultati pretrage</h2>
+        {isMobile && (
+          <p className="mobile-count">
+            {loading
+              ? 'Učitavanje...'
+              : `${filtered.length} ${filtered.length === 1 ? 'proizvod' : 'proizvoda'}`}
+          </p>
+        )}
+
         {loading ? (
           <p className="text-center">Učitavanje...</p>
         ) : filtered.length === 0 ? (
-          <p className="text-center">Nema pronađenih proizvoda.</p>
+          <div className="no-results">
+            <p>Nema pronađenih proizvoda.</p>
+            {activeFilterCount > 0 && (
+              <button className="no-results-reset" onClick={resetFilters} type="button">
+                Obriši filtere
+              </button>
+            )}
+          </div>
         ) : (
-          <div className="product-list">
-            {filtered.map((product) => (
-              <div key={product.id} className="product-card">
-                <Link href={`/product/${String(product.id)}`}>
-                  <img src={product.imageUrl} alt={product.name} />
-                </Link>
-                <div className="product-card-content">
-                  <h2>{product.name}</h2>
-                  <span>{product.price} RSD</span>
-                </div>
-                <button className="add-to-cart" onClick={() => addToCart(product)}>
-                  Dodaj u korpu
+          <>
+            <div className="product-list">
+              {visibleResults.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            {visibleCount < sortedResults.length && (
+              <div className="load-more-wrap">
+                <button
+                  className="load-more-btn"
+                  type="button"
+                  onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                >
+                  Prikaži još ({sortedResults.length - visibleCount})
                 </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
