@@ -1,0 +1,8 @@
+# Za slučaj deploy-a iz lokalnog foldera (vercel deploy) — nikad ne slati tajne
+.env*
+!.env.example
+serviceAccountKey.json
+uploads/
+.agents/
+.claude/
+skills-lock.json
