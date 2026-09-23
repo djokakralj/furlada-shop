@@ -67,12 +67,13 @@
   margin-top: 34px;
 }
 
-.heroGhost {
+/* .heroActions ispred — jača specifičnost od globalne .btn */
+.heroActions .heroGhost {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.7);
 }
 
-.heroGhost:hover {
+.heroActions .heroGhost:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: #fff;
 }

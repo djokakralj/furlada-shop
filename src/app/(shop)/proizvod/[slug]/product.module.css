@@ -237,7 +237,7 @@
   height: 52px;
 }
 
-.addBtn {
+.actions .addBtn {
   flex: 1;
   min-height: 52px;
 }
