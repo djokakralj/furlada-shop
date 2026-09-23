@@ -43,6 +43,20 @@ export const auth = betterAuth({
       role: { type: 'string', required: false, defaultValue: 'user', input: false },
     },
   },
+  // Za direktne pozive /api/auth/* (naše server akcije imaju svoj limiter u
+  // lib/rate-limit.ts). U bazi — na serverless-u memorija nije deljena.
+  rateLimit: {
+    enabled: true,
+    storage: 'database',
+    window: 60,
+    max: 100,
+    customRules: {
+      '/sign-in/email': { window: 15 * 60, max: 10 },
+      '/sign-up/email': { window: 60 * 60, max: 5 },
+      '/request-password-reset': { window: 60 * 60, max: 5 },
+      '/change-password': { window: 15 * 60, max: 5 },
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 dana
     cookieCache: { enabled: true, maxAge: 60 * 5 },

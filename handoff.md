@@ -10,7 +10,7 @@ npm run db:up      # Docker Postgres na portu 5434 (5432/5433 zauzimaju lokalni 
 npm run dev        # http://localhost:3000
 ```
 
-Detaljno u `README.md`. Admin: `stokic@gmail.com` / `stokic123` (iz `.env`). Test kupci: `*@example.com` / `furlada123`.
+Detaljno u `README.md`. Lokalni admin: `stokic@gmail.com`, lozinka iz `SEED_ADMIN_PASSWORD` u `.env`. Test kupci (samo lokalno): `*@example.com`.
 
 ## Stack
 

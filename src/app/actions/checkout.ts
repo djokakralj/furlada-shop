@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { orderItems, orders, products, user } from '@/db/schema';
 import { DELIVERY_COST } from '@/lib/constants';
 import { sendEmail } from '@/lib/email';
+import { allow, clientIp, TOO_MANY } from '@/lib/rate-limit';
 import { getCurrentUser } from '@/lib/session';
 import { getSiteUrl } from '@/lib/site-url';
 import { formatPrice, orderNumber } from '@/lib/utils';
@@ -16,6 +17,8 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ orderId
     return { ok: false, error: 'Proverite označena polja.', fieldErrors: fieldErrors(parsed.error) };
   }
   const data = parsed.data;
+  // Zaštita od spam porudžbina (bot koji zasipa admina lažnim porudžbinama)
+  if (!(await allow(`order:${await clientIp()}`, 10, 60 * 60))) return { ok: false, error: TOO_MANY };
   const currentUser = await getCurrentUser();
 
   // Cene i dostupnost se UVEK čitaju iz baze — nikad ne verujemo klijentu

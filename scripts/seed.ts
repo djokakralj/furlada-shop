@@ -37,6 +37,14 @@ async function main() {
     throw new Error('SEED_ADMIN_EMAIL i SEED_ADMIN_PASSWORD moraju biti podešeni u .env');
   }
 
+  // Na udaljenoj (produkcijskoj) bazi: bez test kupaca i lažnih porudžbina,
+  // i admin lozinka mora biti jaka
+  const host = new URL(process.env.DATABASE_URL!).hostname;
+  const isLocal = ['localhost', '127.0.0.1'].includes(host);
+  if (!isLocal && adminPassword.length < 14) {
+    throw new Error('Za udaljenu bazu SEED_ADMIN_PASSWORD mora imati bar 14 karaktera.');
+  }
+
   console.log('── Vrste proizvoda');
   const subRows = await db
     .insert(subcategories)
@@ -92,6 +100,11 @@ async function main() {
   });
   await db.update(user).set({ role: 'admin' }).where(eq(user.id, adminId));
   console.log(`   admin: ${adminEmail}`);
+
+  if (!isLocal) {
+    console.log('\nUdaljena baza — test kupci i porudžbine se preskaču. Gotovo.');
+    process.exit(0);
+  }
 
   const customerIds: string[] = [];
   for (const u of USERS) {

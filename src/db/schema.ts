@@ -1,5 +1,6 @@
 import { relations, sql } from 'drizzle-orm';
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -85,6 +86,22 @@ export const verification = pgTable(
   },
   (t) => [index('verification_identifier_idx').on(t.identifier)],
 );
+
+// Better Auth rate limit (za /api/auth/* endpointe) — u bazi, jer na
+// serverless-u memorija nije deljena između instanci
+export const rateLimit = pgTable('rate_limit', {
+  id: text('id').primaryKey(),
+  key: text('key').notNull(),
+  count: integer('count').notNull(),
+  lastRequest: bigint('last_request', { mode: 'number' }).notNull(),
+});
+
+// Naš limiter za server akcije (prijava, registracija, poručivanje…)
+export const actionLimits = pgTable('action_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull(),
+  resetAt: timestamp('reset_at', { withTimezone: true }).notNull(),
+});
 
 // ─── Katalog ────────────────────────────────────────────────────────────────
 

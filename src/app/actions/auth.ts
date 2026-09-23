@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { user } from '@/db/schema';
 import { auth } from '@/lib/auth';
+import { allow, clientIp, TOO_MANY } from '@/lib/rate-limit';
+import { safeNext } from '@/lib/utils';
 import { requireUser } from '@/lib/session';
 import { emailSchema, fieldErrors, passwordSchema, profileSchema, registerSchema } from '@/lib/validation';
 
@@ -18,11 +20,6 @@ export type FormState = {
   values?: Record<string, string>;
 } | null;
 
-// Dozvoljeni su samo relativni putevi unutar sajta (zaštita od open-redirect)
-function safeNext(value: FormDataEntryValue | null, fallback: string) {
-  const v = typeof value === 'string' ? value : '';
-  return v.startsWith('/') && !v.startsWith('//') ? v : fallback;
-}
 
 const errorCode = (err: unknown) => (err instanceof APIError ? (err.body?.code as string | undefined) : undefined);
 
@@ -30,6 +27,12 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
   if (!email || !password) return { error: 'Unesite email adresu i lozinku.', values: { email } };
+
+  // Zaštita od pogađanja lozinke: po IP adresi i po nalogu
+  const ip = await clientIp();
+  if (!(await allow(`login:ip:${ip}`, 20, 15 * 60)) || !(await allow(`login:email:${email}`, 8, 15 * 60))) {
+    return { error: TOO_MANY, values: { email } };
+  }
 
   try {
     await auth.api.signInEmail({
@@ -51,6 +54,7 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
   const values = { name: raw.name, lastName: raw.lastName, email: raw.email };
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), values };
+  if (!(await allow(`signup:${await clientIp()}`, 5, 60 * 60))) return { error: TOO_MANY, values };
 
   try {
     await auth.api.signUpEmail({
@@ -81,6 +85,9 @@ export async function signOut() {
 export async function requestPasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = emailSchema.safeParse(formData.get('email'));
   if (!parsed.success) return { fieldErrors: { email: parsed.error.issues[0].message } };
+  if (!(await allow(`reset:ip:${await clientIp()}`, 5, 60 * 60)) || !(await allow(`reset:email:${parsed.data}`, 3, 60 * 60))) {
+    return { error: TOO_MANY };
+  }
   try {
     await auth.api.requestPasswordReset({ body: { email: parsed.data, redirectTo: '/nova-lozinka' } });
   } catch (err) {
@@ -137,7 +144,8 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
 }
 
 export async function changePassword(_prev: FormState, formData: FormData): Promise<FormState> {
-  await requireUser();
+  const current = await requireUser();
+  if (!(await allow(`password:${current.id}`, 5, 15 * 60))) return { error: TOO_MANY };
   const parsed = z
     .object({ current: z.string().min(1, 'Unesite trenutnu lozinku.'), password: passwordSchema, confirm: z.string() })
     .refine((d) => d.password === d.confirm, { path: ['confirm'], message: 'Lozinke se ne poklapaju.' })

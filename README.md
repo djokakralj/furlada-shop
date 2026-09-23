@@ -16,7 +16,7 @@ npm run dev                   # http://localhost:3000
 ```
 
 Admin panel: `/admin` (nalog iz `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
-Test kupci: `marija.petrovic@example.com`, `jovan.nikolic@example.com`, `ana.jovanovic@example.com` — lozinka `furlada123`.
+Test kupci (prave se samo na lokalnoj bazi): `marija.petrovic@example.com`, `jovan.nikolic@example.com`, `ana.jovanovic@example.com` — lozinka u `scripts/seed-data.ts`.
 
 ## Skripte
 

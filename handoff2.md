@@ -15,8 +15,10 @@ Prvi put (ili za čistu bazu): `npm run db:reset` — briše lokalnu bazu, pokre
 
 | Nalog | Email | Lozinka |
 |---|---|---|
-| Admin | `stokic@gmail.com` | `stokic123` (iz `.env`) |
-| Test kupci | `marija.petrovic@example.com`, `jovan.nikolic@example.com`, `ana.jovanovic@example.com` | `furlada123` |
+| Admin (lokalno) | `stokic@gmail.com` | iz `SEED_ADMIN_PASSWORD` u `.env` |
+| Test kupci (samo lokalno) | `marija.petrovic@example.com`, `jovan.nikolic@example.com`, `ana.jovanovic@example.com` | iz `scripts/seed-data.ts` |
+
+Produkcija (Vercel + Neon) ima **drugu, jaku admin lozinku** i nema test naloge.
 
 Admin panel: `/admin`. Detaljno uputstvo i sve skripte: `README.md`.
 
@@ -67,6 +69,15 @@ Commit-i na grani `next-migration`: `74c2b7f` (stari CRA rad) → `50309d2` (mig
 - `.page` daje samo vertikalni padding (kombinuje se sa `.container`).
 - Drizzle ne kvalifikuje kolone u upitima nad jednom tabelom → u podupitima koristiti JOIN + GROUP BY.
 - Izmena šeme: `src/db/schema.ts` → `npm run db:generate` → `npm run db:migrate`.
+
+## Hosting (Vercel) i bezbednost
+
+- Vercel projekat `furlada-shop` (tim `djokakraljs-projects`), region **fra1**, povezan sa GitHub-om: push na `main` = produkcija, push na drugu granu = preview.
+- Baza: **Neon** (besplatan plan, Frankfurt) preko Vercel Marketplace-a — `DATABASE_URL` (pooler) i `DATABASE_URL_UNPOOLED` (za migracije) postavljeni samo za Production/Preview. Migracije se pokreću automatski pri svakom build-u (`vercel.json`).
+- Slike: **Vercel Blob** store `furlada-images` (javni, fra1). Admin upload: browser smanji sliku, šalje jednu po jednu (Vercel limit 4,5 MB po zahtevu), server pravi WebP.
+- Produkcijska baza ima samo katalog i admina (jaka lozinka, nije u repou); test kupci postoje samo lokalno. Seed odbija slabu admin lozinku na udaljenoj bazi.
+- Zaštite: ograničenje pokušaja u bazi (prijava 8/15 min po nalogu i 20 po IP, registracija, reset lozinke, poručivanje, Better Auth API), bezbednosni HTTP zaglavlja, provera `next` parametra (open redirect), provera argumenata admin akcija, dozvoljeni izvori slika.
+- **Repo je javan** — ništa tajno ne sme u git (lozinke, `.env`, ključevi).
 
 ## Otvoreno za sledeću sesiju
 

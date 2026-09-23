@@ -16,8 +16,13 @@ import { fieldErrors, type ActionResult } from '@/lib/validation';
 
 // ─── Porudžbine ─────────────────────────────────────────────────────────────
 
+// Argumenti server akcija stižu sa klijenta — TypeScript tipovi ne važe u
+// runtime-u, pa se sve proverava
+const uuid = z.string().uuid();
+
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<ActionResult> {
   await requireAdmin();
+  if (!uuid.safeParse(orderId).success) return { ok: false, error: 'Neispravna porudžbina.' };
   if (!ORDER_STATUSES.includes(status)) return { ok: false, error: 'Nepoznat status.' };
   await db.update(orders).set({ status }).where(eq(orders.id, orderId));
   revalidatePath('/admin', 'layout');
@@ -38,7 +43,18 @@ const productSchema = z
     gender: z.enum(['zene', 'muskarci', 'unisex']),
     color: z.string().trim().min(1, 'Izaberite boju.'),
     sizes: z.array(z.string()).max(30),
-    images: z.array(z.string().trim().min(1)).max(10),
+    // samo izvori koje next/image sme da učita (inače bi se stranica proizvoda srušila)
+    images: z
+      .array(
+        z
+          .string()
+          .trim()
+          .regex(
+            /^(https:\/\/images\.unsplash\.com\/|https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/|\/uploads\/)/,
+            'Nepodržan izvor slike.',
+          ),
+      )
+      .max(10),
     featured: z.boolean(),
     active: z.boolean(),
   })
@@ -64,6 +80,7 @@ async function uniqueSlug(name: string, excludeId?: string) {
 
 export async function saveProduct(id: string | null, input: ProductInput): Promise<ActionResult<{ id: string }>> {
   await requireAdmin();
+  if (id !== null && !uuid.safeParse(id).success) return { ok: false, error: 'Neispravan zahtev.' };
   const parsed = productSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'Proverite označena polja.', fieldErrors: fieldErrors(parsed.error) };
   const d = parsed.data;
@@ -112,13 +129,17 @@ export async function saveProduct(id: string | null, input: ProductInput): Promi
 
 export async function setProductFlag(id: string, flag: 'active' | 'featured', value: boolean): Promise<ActionResult> {
   await requireAdmin();
-  await db.update(products).set({ [flag]: value }).where(eq(products.id, id));
+  if (!uuid.safeParse(id).success || (flag !== 'active' && flag !== 'featured') || typeof value !== 'boolean') {
+    return { ok: false, error: 'Neispravan zahtev.' };
+  }
+  await db.update(products).set(flag === 'active' ? { active: value } : { featured: value }).where(eq(products.id, id));
   revalidatePath('/', 'layout');
   return { ok: true };
 }
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
   await requireAdmin();
+  if (!uuid.safeParse(id).success) return { ok: false, error: 'Neispravan zahtev.' };
   // Stavke porudžbina čuvaju snimak naziva/cene, pa brisanje ne kvari istoriju
   await db.delete(products).where(eq(products.id, id));
   revalidatePath('/', 'layout');
@@ -153,6 +174,7 @@ export type SubcategoryInput = z.input<typeof subcategorySchema>;
 
 export async function saveSubcategory(id: number | null, input: SubcategoryInput): Promise<ActionResult<{ id: number }>> {
   await requireAdmin();
+  if (id !== null && !Number.isInteger(id)) return { ok: false, error: 'Neispravan zahtev.' };
   const parsed = subcategorySchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'Proverite označena polja.', fieldErrors: fieldErrors(parsed.error) };
   const d = { ...parsed.data, sizes: [...new Set(parsed.data.sizes)] };
@@ -174,6 +196,7 @@ export async function saveSubcategory(id: number | null, input: SubcategoryInput
 
 export async function deleteSubcategory(id: number): Promise<ActionResult> {
   await requireAdmin();
+  if (!Number.isInteger(id)) return { ok: false, error: 'Neispravan zahtev.' };
   const [{ value }] = await db.select({ value: count() }).from(products).where(eq(products.subcategoryId, id));
   if (value > 0) {
     return { ok: false, error: `Vrsta ima ${value} proizvoda — prvo ih premestite ili obrišite.` };
@@ -187,6 +210,7 @@ export async function deleteSubcategory(id: number): Promise<ActionResult> {
 
 export async function setUserRole(userId: string, role: 'user' | 'admin'): Promise<ActionResult> {
   const admin = await requireAdmin();
+  if (typeof userId !== 'string' || (role !== 'user' && role !== 'admin')) return { ok: false, error: 'Neispravan zahtev.' };
   if (userId === admin.id) return { ok: false, error: 'Ne možete promeniti sopstvenu ulogu.' };
   await db.update(user).set({ role }).where(eq(user.id, userId));
   revalidatePath('/admin/korisnici');

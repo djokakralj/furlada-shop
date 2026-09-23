@@ -56,6 +56,13 @@ export function plural(n: number, one: string, few: string, many: string) {
   return many;
 }
 
+// Dozvoljeni su samo relativni putevi unutar sajta (zaštita od open-redirect).
+// "//x" i "/\x" browseri tumače kao drugi domen.
+export function safeNext(value: unknown, fallback: string) {
+  const v = typeof value === 'string' ? value : '';
+  return /^\/(?![/\\])/.test(v) && !/[\r\n]/.test(v) ? v : fallback;
+}
+
 export function omit<T extends object>(obj: T, ...keys: string[]) {
   return Object.fromEntries(Object.entries(obj).filter(([k]) => !keys.includes(k))) as T;
 }
