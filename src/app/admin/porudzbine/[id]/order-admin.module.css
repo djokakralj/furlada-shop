@@ -77,6 +77,24 @@
   color: var(--accent-ink);
 }
 
+.address {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  padding-bottom: 4px;
+}
+
+.address strong {
+  font-weight: 600;
+}
+
+.note {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  font-size: 0.82rem;
+}
+
 @media (max-width: 1000px) {
   .layout {
     grid-template-columns: 1fr;

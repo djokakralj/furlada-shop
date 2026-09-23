@@ -1,10 +1,11 @@
-import { ArrowLeft, ExternalLink, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { OrderCustomer, OrderItems, OrderTotals } from '@/components/order/order-details';
 import { OrderTimeline } from '@/components/order/order-status';
 import { getAdminOrder } from '@/lib/admin-queries';
+import { DELIVERY_LABEL } from '@/lib/constants';
 import { requireAdminPage } from '@/lib/session';
 import { formatDate, orderNumber } from '@/lib/utils';
 import ui from '../../ui.module.css';
@@ -71,6 +72,48 @@ export default async function AdminOrderPage({ params }: Props) {
             </div>
             <div className={ui.cardBody}>
               <StatusControl orderId={order.id} status={order.status} />
+            </div>
+          </section>
+          <section className={ui.card}>
+            <div className={ui.cardHead}>
+              <h2>Dostava</h2>
+              <span className={ui.small}>{DELIVERY_LABEL[order.delivery]}</span>
+            </div>
+            <div className={styles.contact}>
+              <p className={styles.address}>
+                <strong>
+                  {order.firstName} {order.lastName}
+                </strong>
+                {order.street ? (
+                  <>
+                    <br />
+                    {order.street} {order.streetNumber}
+                    <br />
+                    {order.postalCode} {order.city}
+                  </>
+                ) : (
+                  <>
+                    <br />
+                    Lično preuzimanje — bez adrese
+                  </>
+                )}
+              </p>
+              {order.street && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${order.street} ${order.streetNumber}, ${order.postalCode} ${order.city}, Srbija`,
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MapPin size={15} /> Otvori na mapi
+                </a>
+              )}
+              {order.note && (
+                <p className={styles.note}>
+                  <strong>Napomena:</strong> {order.note}
+                </p>
+              )}
             </div>
           </section>
           <section className={ui.card}>

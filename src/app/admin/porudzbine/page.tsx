@@ -80,7 +80,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                   <th>Broj</th>
                   <th>Datum</th>
                   <th>Kupac</th>
-                  <th>Dostava</th>
+                  <th>Adresa dostave</th>
                   <th>Artikala</th>
                   <th>Status</th>
                   <th className={ui.num}>Iznos</th>
@@ -99,9 +99,17 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                       {o.firstName} {o.lastName}
                       <div className={ui.small}>{o.email}</div>
                     </td>
-                    <td className={ui.small}>
-                      {DELIVERY_LABEL[o.delivery]}
-                      {o.city && <div>{o.city}</div>}
+                    <td>
+                      {o.street ? (
+                        <>
+                          {o.street} {o.streetNumber}
+                          <div className={ui.small}>
+                            {o.postalCode} {o.city}
+                          </div>
+                        </>
+                      ) : (
+                        <span className={ui.small}>{DELIVERY_LABEL[o.delivery]}</span>
+                      )}
                     </td>
                     <td>{o.items.reduce((s, i) => s + i.quantity, 0)}</td>
                     <td>
