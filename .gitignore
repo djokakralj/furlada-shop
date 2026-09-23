@@ -26,3 +26,7 @@ npm-debug.log*
 !.env.example
 serviceAccountKey.json
 .git.zip
+
+# Vercel CLI dopisuje ".env*" ovde — izuzetak mora ostati poslednji
+.env*
+!.env.example

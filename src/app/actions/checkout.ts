@@ -6,6 +6,7 @@ import { orderItems, orders, products, user } from '@/db/schema';
 import { DELIVERY_COST } from '@/lib/constants';
 import { sendEmail } from '@/lib/email';
 import { getCurrentUser } from '@/lib/session';
+import { getSiteUrl } from '@/lib/site-url';
 import { formatPrice, orderNumber } from '@/lib/utils';
 import { checkoutSchema, fieldErrors, type ActionResult } from '@/lib/validation';
 
@@ -85,7 +86,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ orderId
     return order;
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const siteUrl = getSiteUrl();
   await sendEmail({
     to: data.email,
     subject: `Furlada — porudžbina ${orderNumber(order.number)} je primljena`,

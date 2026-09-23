@@ -17,6 +17,7 @@
     "db:reset": "tsx --env-file=.env scripts/reset.ts && npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "better-auth": "^1.7.5",
     "drizzle-orm": "^0.45.3",
     "lucide-react": "^1.47.0",

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { EB_Garamond, Montserrat } from 'next/font/google';
 import { Providers } from '@/components/providers';
+import { getSiteUrl } from '@/lib/site-url';
 import './globals.css';
 
 // Naslovni font. Cormorant (stari naslovni font) na Google Fonts pogrešno
@@ -21,7 +22,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: 'Furlada — moda koja govori vašim jezikom',
     template: '%s | Furlada',

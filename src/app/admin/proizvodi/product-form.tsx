@@ -12,6 +12,7 @@ import type { Subcategory } from '@/db/schema';
 import { CATEGORY_LABEL, COLORS, GENDER_LABEL } from '@/lib/constants';
 import { capitalize, cx, formatPrice, omit } from '@/lib/utils';
 import ui from '../ui.module.css';
+import { prepareImage } from './prepare-image';
 import styles from './product-form.module.css';
 
 export type ProductFormValues = {
@@ -91,17 +92,22 @@ export function ProductForm({
     set('sizes', v.sizes.includes(size) ? v.sizes.filter((s) => s !== size) : [...v.sizes, size]);
 
   const upload = (files: FileList | File[]) => {
-    const list = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    const list = Array.from(files)
+      .filter((f) => f.type.startsWith('image/'))
+      .slice(0, Math.max(0, 10 - v.images.length));
     if (list.length === 0) return;
-    const fd = new FormData();
-    list.slice(0, 10).forEach((f) => fd.append('files', f));
     startUpload(async () => {
-      const res = await uploadImages(fd);
-      if (res.ok) {
-        setV((prev) => ({ ...prev, images: [...prev.images, ...res.data.urls].slice(0, 10) }));
-        setErrors((prev) => omit(prev, 'images'));
-      } else {
-        showToast(res.error ?? 'Greška pri otpremanju.', 'error');
+      // Jedna po jedna — svaki zahtev ostaje ispod limita od 4,5 MB na Vercelu
+      for (const original of list) {
+        const fd = new FormData();
+        fd.append('files', await prepareImage(original));
+        const res = await uploadImages(fd);
+        if (res.ok) {
+          setV((prev) => ({ ...prev, images: [...prev.images, ...res.data.urls].slice(0, 10) }));
+          setErrors((prev) => omit(prev, 'images'));
+        } else {
+          showToast(res.error ?? `Greška pri otpremanju: ${original.name}`, 'error');
+        }
       }
     });
   };
@@ -239,7 +245,7 @@ export function ProductForm({
             >
               <ImagePlus size={26} strokeWidth={1.4} />
               <strong>{uploading ? 'Otpremanje…' : 'Prevucite slike ovde ili kliknite za izbor'}</strong>
-              <span>JPG, PNG, WebP ili AVIF, do 8 MB po slici. Slike se automatski smanjuju i optimizuju.</span>
+              <span>JPG, PNG, WebP ili AVIF. Slike se automatski smanjuju i optimizuju pre čuvanja.</span>
               <input
                 ref={fileInput}
                 type="file"
